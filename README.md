@@ -43,9 +43,9 @@ Here's how you can get the project up and running on your local machine for deve
 
 Start the Streamlit app with this command:
 
-    ```bash
-    poetry run streamlit run app.py
-    ```
+```bash
+poetry run streamlit run app.py
+```
 
 The app will spring to life in your default web browser.
 
