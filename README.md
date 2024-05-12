@@ -1,5 +1,9 @@
 # 📚 QA Generator - Your Personal Quizmaster
 
+[![lint](https://github.com/NanthagopalEswaran/QA_Generator/actions/workflows/lint.yml/badge.svg?)](https://github.com/NanthagopalEswaran/QA_Generator/actions/workflows/lint.yml)
+[![test](https://github.com/NanthagopalEswaran/QA_Generator/actions/workflows/test.yml/badge.svg?)](https://github.com/NanthagopalEswaran/QA_Generator/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/NanthagopalEswaran/QA_Generator/graph/badge.svg?token=181R0ZGJUU)](https://codecov.io/gh/NanthagopalEswaran/QA_Generator)
+
 ## 🎉 Welcome Aboard
 
 Welcome to the QA Generator, a free and open-source AI tool that transforms your documents into quizzes in a matter of minutes. From simple quizzes to full-blown mock exam papers, we've got you covered!
@@ -29,15 +33,15 @@ Here's how you can get the project up and running on your local machine for deve
 
 1. **Clone** the repository to your local machine:
 
-    ```bash
-    git clone https://github.com/NanthagopalEswaran/QA_Generator.git
-    ```
+   ```bash
+   git clone https://github.com/NanthagopalEswaran/QA_Generator.git
+   ```
 
 2. Install the dependencies using Poetry:
 
-    ```bash
-    poetry install
-    ```
+   ```bash
+   poetry install
+   ```
 
 ### Fire Up the Application
 
