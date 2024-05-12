@@ -1,0 +1,108 @@
+name: "\U0001F41B Bug Report"
+description: Report a bug in QA Generator. To report a security issue, please instead use the security option below. For questions, please use the GitHub Discussions.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to file a bug report.
+
+        Use this to report bugs in QA Generator.
+
+        If you're not certain that your issue is due to a bug in QA Generator, please use [GitHub Discussions](https://github.com/NanthagopalEswaran/QA_Generator/discussions/categories/q-a)
+        to ask for help with your issue.
+
+        Relevant links to check before filing a bug report to see if your issue has already been reported, fixed or
+        if there's another way to solve your problem:
+
+        [GitHub search](https://github.com/NanthagopalEswaran/QA_Generator),
+        [QA Generator Github Discussions](https://github.com/NanthagopalEswaran/QA_Generator/discussions),
+        [QA Generator Github Issues](https://github.com/NanthagopalEswaran/QA_Generator/issues),
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checked other resources
+      description: Please confirm and check all the following options.
+      options:
+        - label: I added a very descriptive title to this issue.
+          required: true
+        - label: I used the GitHub search to find a similar question and didn't find it.
+          required: true
+        - label: I am sure that this is a bug in QA Generator rather than my code.
+          required: true
+        - label: The bug is not resolved by updating to the latest stable version of QA Generator (or the specific integration package).
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: |
+        What is the problem, question, or error?
+
+        Write a short description telling what you are doing, what you expect to happen, and what is currently happening.
+      placeholder: |
+        * I'm trying to use the `qa_generator` library to do X.
+        * I expect to see Y.
+        * Instead, it does Z.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    validations:
+      required: true
+    attributes:
+      label: Reproduce Steps
+      description: |
+        Please provide the steps to reproduce the issue.
+
+        Incase of streamlit app, please provide below details:
+          - File Used (Optional)
+          - Settings Used
+
+        Incase of python library, please provide below details:
+        Please add a self-contained, [minimal, reproducible, example](https://stackoverflow.com/help/minimal-reproducible-example) with your use case.
+
+        If a maintainer can copy it, run it, and see it right away, there's a much higher chance that you'll be able to get help.
+
+        **Important!**
+
+        * Use code tags (e.g., ```python ... ```) to correctly [format your code](https://help.github.com/en/github/writing-on-github/creating-and-highlighting-code-blocks#syntax-highlighting).
+        * INCLUDE the language label (e.g. `python`) after the first three backticks to enable syntax highlighting. (e.g., ```python rather than ```).
+        * Reduce your code to the minimum required to reproduce the issue if possible. This makes it much easier for others to help you.
+        * Avoid screenshots when possible, as they are hard to read and (more importantly) don't allow others to copy-and-paste your code.
+
+      placeholder: Be detailed as much as possible
+  - type: textarea
+    id: error
+    validations:
+      required: false
+    attributes:
+      label: Error Message and Stack Trace (if applicable)
+      description: |
+        If you are reporting an error, please include the full error message and stack trace.
+      placeholder: |
+        Exception + full stack trace
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Info
+      description: |
+        Please share your system info with us.
+          - OS
+          - Python Version [Do `poetry run python --version` and refer the version and bitness]
+          - QA Generator Commit ID [Do `git rev-parse HEAD` and paste the output here]
+
+        In case of a qa_generator library, please provide the below details:
+          - Pip Freeze output [Do `pip freeze` and paste the output here]
+
+      placeholder: |
+        OS: Windows 10
+        Python Version: 3.8.5 [64-bit]
+        QA Generator Commit ID: d34550d
+        Pip Freeze:
+          - qa_generator==0.1.0
+          - streamlit==0.89.0
+          - ...
+
+    validations:
+      required: true
