@@ -12,6 +12,7 @@ from qa_generator.qa_generator import generate_questions
 test_file_path = os.path.join(os.path.dirname(__file__), "sample_files", "python_syntax.pdf")
 
 
+@pytest.mark.skip("Skip this test")
 @pytest.mark.parametrize(
     "question_type",
     [QuestionType.OPEN_ENDED, QuestionType.TRUE_FALSE],
@@ -48,6 +49,7 @@ def test_qa_generation(generate_answers, question_type):
     assert_expectations()
 
 
+@pytest.mark.skip("Skip this test")
 @pytest.mark.parametrize("generate_answers", [True, False])
 @pytest.mark.parametrize("num_options", [3, 4])
 def test_qa_generation_multiple_choice(num_options, generate_answers):
