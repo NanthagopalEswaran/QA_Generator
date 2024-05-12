@@ -27,6 +27,7 @@ jobs:
         poetry install --sync
     - name: Lint with ruff & mypy
       run: |
+        poetry shell
         ruff
         ruff-format
         mypy
