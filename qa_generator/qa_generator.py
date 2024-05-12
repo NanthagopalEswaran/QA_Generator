@@ -75,7 +75,6 @@ def generate_a_question_for_given_passage(
     # Generate the question using the prompt and parser (using openai)
     qa_chain = prompt | model | parser
 
-    return None
     output = qa_chain.invoke(
         {"passage": passage, "no_choices": num_options, "difficulty": difficulty.value}
     )
