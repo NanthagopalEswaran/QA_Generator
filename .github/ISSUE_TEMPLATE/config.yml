@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+version: 2.1
+contact_links:
+  - name: 🤔 Question or Problem
+    about: Ask a question or ask about a problem in GitHub Discussions.
+    url: https://github.com/NanthagopalEswaran/QA_Generator/discussions/categories/q-a
+  - name: 💡 Feature Request or Ideas
+    url: https://github.com/NanthagopalEswaran/QA_Generator/discussions/categories/ideas
+    about: Suggest a feature or an idea
+  - name: Show and tell
+    about: Show what you built with QA Generator
+    url: https://github.com/NanthagopalEswaran/QA_Generator/discussions/categories/show-and-tell
