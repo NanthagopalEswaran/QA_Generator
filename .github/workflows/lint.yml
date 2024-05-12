@@ -27,6 +27,6 @@ jobs:
         poetry install --sync
     - name: Lint with ruff & mypy
       run: |
-        poetry run ruff
-        poetry run ruff-format
-        poetry run mypy
+        poetry run ruff check
+        poetry run ruff format
+        poetry run mypy qa_generator app.py
