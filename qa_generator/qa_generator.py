@@ -6,62 +6,7 @@ from langchain_openai import ChatOpenAI
 
 from .constants import DifficultyLevel, QuestionType
 from .file_parser import File
-from .prompts import (
-    GENERATE_FILL_IN_THE_BLANK_PROMPT,
-    GENERATE_FILL_IN_THE_BLANK_QUESTION_ANSWER_PROMPT,
-    GENERATE_MULTIPLE_CHOICE_PROMPT,
-    GENERATE_MULTIPLE_CHOICE_QUESTION_ANSWER_PROMPT,
-    GENERATE_OPEN_ENDED_PROMPT,
-    GENERATE_OPEN_ENDED_QUESTION_ANSWER_PROMPT,
-    GENERATE_TRUE_FALSE_PROMPT,
-    GENERATE_TRUE_FALSE_QUESTION_ANSWER_PROMPT,
-    fill_in_the_blank_question_answer_parser,
-    fill_in_the_blank_question_parser,
-    multiple_choice_question_answer_parser,
-    multiple_choice_question_parser,
-    open_ended_question_answer_parser,
-    open_ended_question_parser,
-    true_false_question_answer_parser,
-    true_false_question_parser,
-)
-
-prompts_without_answer = {
-    QuestionType.MULTIPLE_CHOICE: {
-        "prompt": GENERATE_MULTIPLE_CHOICE_PROMPT,
-        "parser": multiple_choice_question_parser,
-    },
-    QuestionType.TRUE_FALSE: {
-        "prompt": GENERATE_TRUE_FALSE_PROMPT,
-        "parser": true_false_question_parser,
-    },
-    QuestionType.FILL_IN_THE_BLANK: {
-        "prompt": GENERATE_FILL_IN_THE_BLANK_PROMPT,
-        "parser": fill_in_the_blank_question_parser,
-    },
-    QuestionType.OPEN_ENDED: {
-        "prompt": GENERATE_OPEN_ENDED_PROMPT,
-        "parser": open_ended_question_parser,
-    },
-}
-
-prompts_with_answer = {
-    QuestionType.MULTIPLE_CHOICE: {
-        "prompt": GENERATE_MULTIPLE_CHOICE_QUESTION_ANSWER_PROMPT,
-        "parser": multiple_choice_question_answer_parser,
-    },
-    QuestionType.TRUE_FALSE: {
-        "prompt": GENERATE_TRUE_FALSE_QUESTION_ANSWER_PROMPT,
-        "parser": true_false_question_answer_parser,
-    },
-    QuestionType.FILL_IN_THE_BLANK: {
-        "prompt": GENERATE_FILL_IN_THE_BLANK_QUESTION_ANSWER_PROMPT,
-        "parser": fill_in_the_blank_question_answer_parser,
-    },
-    QuestionType.OPEN_ENDED: {
-        "prompt": GENERATE_OPEN_ENDED_QUESTION_ANSWER_PROMPT,
-        "parser": open_ended_question_answer_parser,
-    },
-}
+from .prompts import get_question_class
 
 
 def generate_questions(
@@ -128,11 +73,13 @@ def generate_a_question_for_given_passage(
     prompt, parser = generate_question_prompt_and_parser(question_type, generate_answers)
 
     # Generate the question using the prompt and parser (using openai)
-    prompt_and_model = prompt | model
-    output = prompt_and_model.invoke(
+    qa_chain = prompt | model | parser
+
+    return None
+    output = qa_chain.invoke(
         {"passage": passage, "no_choices": num_options, "difficulty": difficulty.value}
     )
-    return parser.invoke(output)
+    return output
 
 
 def generate_question_prompt_and_parser(question_type: QuestionType, generate_answers: bool):
@@ -146,12 +93,5 @@ def generate_question_prompt_and_parser(question_type: QuestionType, generate_an
     Returns:
         tuple: A tuple containing the prompt and parser for the given question type and whether to generate answers.
     """
-    if generate_answers:
-        return (
-            prompts_with_answer[question_type]["prompt"],
-            prompts_with_answer[question_type]["parser"],
-        )
-    return (
-        prompts_without_answer[question_type]["prompt"],
-        prompts_without_answer[question_type]["parser"],
-    )
+
+    return get_question_class(question_type).get_qa_prompt_and_parser(with_answer=generate_answers)

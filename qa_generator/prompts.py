@@ -1,173 +1,187 @@
+from typing import Any, Optional
+
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel
 
+from .constants import QuestionType
 
-# Multiple choice question generation
-class MultipleChoiceQuestion(BaseModel):
+general_qa_template = """Generate a {question_type} question based on the passage provided below.
+
+Passage (seperated by 3 backticks):
+```{passage}```
+
+Instructions for Question Generation:
+{question_specific_instructions}
+
+Difficulty Level:
+{difficulty}
+
+Output Format Instructions:
+{format_instructions}
+"""
+
+
+class BaseQuestion:
     """
-    A multiple choice question.
-    """
-
-    question: str
-    options: list[str]
-
-
-multiple_choice_question_parser = PydanticOutputParser(pydantic_object=MultipleChoiceQuestion)
-
-
-GENERATE_MULTIPLE_CHOICE_PROMPT = PromptTemplate(
-    template="""Generate a multiple choice question with {no_choices} choices for the following passage: \n\n```{passage}```\n\nDifficulty Level: {difficulty}\n\n{format_instructions}""",
-    input_variables=["passage", "no_choices"],
-    partial_variables={
-        "format_instructions": multiple_choice_question_parser.get_format_instructions()
-    },
-)
-
-
-# Multiple choice question and answer generation
-class MultipleChoiceQuestionAnswer(BaseModel):
-    """
-    A multiple choice question and its answer.
+    Base class to store all the prompts and parser related to question generation.
     """
 
-    question: str
-    options: list[str]
-    answer: str
+    question_type: QuestionType
 
+    class Output(BaseModel):
+        """
+        Output of the question generation.
+        """
 
-multiple_choice_question_answer_parser = PydanticOutputParser(
-    pydantic_object=MultipleChoiceQuestionAnswer
-)
+        question: str
 
-GENERATE_MULTIPLE_CHOICE_QUESTION_ANSWER_PROMPT = PromptTemplate(
-    template="""Generate a multiple choice question with {no_choices} choices and its answer for the following passage: \n\n```{passage}```\n\nDifficulty Level: {difficulty}\n\n{format_instructions}""",
-    input_variables=["passage", "no_choices", "difficulty"],
-    partial_variables={
-        "format_instructions": multiple_choice_question_answer_parser.get_format_instructions()
-    },
-)
+    class OutputWithAnswer(BaseModel):
+        """
+        Output of the question generation with answer.
+        """
+
+        question: str
+        answer: Any
+
+    def __init__(self, question_type: str):
+        """Create general question and answer generation prompts and parsers.
+
+        Args:
+            question_type (str): The type of question to generate.
+        """
+
+        self.output_parser = PydanticOutputParser(pydantic_object=BaseQuestion.Output)
+        self.output_parser_with_answer = PydanticOutputParser(
+            pydantic_object=BaseQuestion.OutputWithAnswer
+        )
+        self.generate_question_prompt = PromptTemplate(
+            template=general_qa_template,
+            input_variables=["passage", "difficulty"],
+            partial_variables={
+                "question_specific_instructions": "",
+                "question_type": question_type,
+                "format_instructions": self.output_parser.get_format_instructions(),
+            },
+        )
+        self.generate_question_answer_prompt = PromptTemplate(
+            template=general_qa_template,
+            input_variables=["passage", "difficulty"],
+            partial_variables={
+                "question_specific_instructions": "",
+                "question_type": question_type,
+                "format_instructions": self.output_parser_with_answer.get_format_instructions(),
+            },
+        )
+
+    def get_qa_prompt_and_parser(self, with_answer: bool = False):
+        """
+        Generate the prompt and parser for question and answer generation.
+
+        Args:
+            with_answer (bool): Whether to generate answer along with the question.
+
+        Returns:
+            tuple: A tuple containing the prompt and parser for qa generation.
+        """
+
+        if with_answer:
+            return self.generate_question_answer_prompt, self.output_parser_with_answer
+        else:
+            return self.generate_question_prompt, self.output_parser
 
 
 # True/false question generation
-class TrueFalseQuestion(BaseModel):
+class TrueFalseQuestion(BaseQuestion):
     """
     A true/false question.
     """
 
-    question: str
+    question_type = QuestionType.TRUE_FALSE
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, question_type="true/false", **kwargs)
 
-true_false_question_parser = PydanticOutputParser(pydantic_object=TrueFalseQuestion)
-
-GENERATE_TRUE_FALSE_PROMPT = PromptTemplate(
-    template="""Generate a true/false question for the following passage: \n\n```{passage}```\n\nDifficulty Level: {difficulty}\n\n{format_instructions}""",
-    input_variables=["passage", "difficulty"],
-    partial_variables={"format_instructions": true_false_question_parser.get_format_instructions()},
-)
-
-
-# True/false question and answer generation
-class TrueFalseQuestionAnswer(BaseModel):
-    """
-    A true/false question and its answer.
-    """
-
-    question: str
-    answer: bool
-
-
-true_false_question_answer_parser = PydanticOutputParser(pydantic_object=TrueFalseQuestionAnswer)
-
-GENERATE_TRUE_FALSE_QUESTION_ANSWER_PROMPT = PromptTemplate(
-    template="""Generate a true/false question and its answer for the following passage: \n\n```{passage}```\n\nDifficulty Level: {difficulty}\n\n{format_instructions}""",
-    input_variables=["passage", "difficulty"],
-    partial_variables={
-        "format_instructions": true_false_question_answer_parser.get_format_instructions()
-    },
-)
-
-
-# Fill in the blank question generation
-class FillInTheBlankQuestion(BaseModel):
-    """
-    A fill in the blank question.
-    """
-
-    question: str
-
-
-fill_in_the_blank_question_parser = PydanticOutputParser(pydantic_object=FillInTheBlankQuestion)
-
-GENERATE_FILL_IN_THE_BLANK_PROMPT = PromptTemplate(
-    template="""Generate a fill in the blank question for the following passage: \n\n```{passage}```\n\nDifficulty Level: {difficulty}\n\nExample: The capital of France is __________.\n\n{format_instructions}""",
-    input_variables=["passage", "difficulty"],
-    partial_variables={
-        "format_instructions": fill_in_the_blank_question_parser.get_format_instructions()
-    },
-)
-
-# Fill in the blank question and answer generation
-
-
-class FillInTheBlankQuestionAnswer(BaseModel):
-    """
-    A fill in the blank question and its answer.
-    """
-
-    question: str
-    answer: str
-
-
-fill_in_the_blank_question_answer_parser = PydanticOutputParser(
-    pydantic_object=FillInTheBlankQuestionAnswer
-)
-
-GENERATE_FILL_IN_THE_BLANK_QUESTION_ANSWER_PROMPT = PromptTemplate(
-    template="""Generate a fill in the blank question and its answer for the following passage: \n\n```{passage}```\n\nDifficulty Level: {difficulty}\n\nExample: The capital of France is __________.\n\n{format_instructions}""",
-    input_variables=["passage", "difficulty"],
-    partial_variables={
-        "format_instructions": fill_in_the_blank_question_answer_parser.get_format_instructions()
-    },
-)
 
 # Open-ended question generation
-
-
-class OpenEndedQuestion(BaseModel):
+class OpenEndedQuestion(BaseQuestion):
     """
     An open-ended question.
     """
 
-    question: str
+    question_type = QuestionType.OPEN_ENDED
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, question_type="open-ended", **kwargs)
 
 
-open_ended_question_parser = PydanticOutputParser(pydantic_object=OpenEndedQuestion)
-
-GENERATE_OPEN_ENDED_PROMPT = PromptTemplate(
-    template="""Generate an open-ended question for the following passage: \n\n```{passage}```\n\nDifficulty Level: {difficulty}\n\n{format_instructions}""",
-    input_variables=["passage", "difficulty"],
-    partial_variables={"format_instructions": open_ended_question_parser.get_format_instructions()},
-)
-
-# Open-ended question and answer generation
-
-
-class OpenEndedQuestionAnswer(BaseModel):
+# Multiple choice question generation
+class MultipleChoiceQuestion(BaseQuestion):
     """
-    An open-ended question and its answer.
+    A multiple choice question.
     """
 
-    question: str
-    answer: str
+    question_type = QuestionType.MULTIPLE_CHOICE
+
+    class Output(BaseModel):
+        """
+        Output of the multiple choice question generation.
+        """
+
+        question: str
+        options: list[str]
+
+    class OutputWithAnswer(BaseModel):
+        """
+        Output of the multiple choice question generation with answer.
+        """
+
+        question: str
+        options: list[str]
+        answer: Optional[str]
+
+    def __init__(self):
+        self.output_parser = PydanticOutputParser(pydantic_object=MultipleChoiceQuestion.Output)
+        self.output_parser_with_answer = PydanticOutputParser(
+            pydantic_object=MultipleChoiceQuestion.OutputWithAnswer
+        )
+        self.generate_question_prompt = PromptTemplate(
+            template=general_qa_template,
+            input_variables=["passage", "no_choices", "difficulty"],
+            partial_variables={
+                "question_type": "multiple choice",
+                "question_specific_instructions": "No of Choices: {no_choices}",
+                "format_instructions": self.output_parser.get_format_instructions(),
+            },
+        )
+
+        self.generate_question_answer_prompt = PromptTemplate(
+            template=general_qa_template,
+            input_variables=["passage", "no_choices", "difficulty"],
+            partial_variables={
+                "question_type": "multiple choice",
+                "question_specific_instructions": "No of Choices: {no_choices}",
+                "format_instructions": self.output_parser_with_answer.get_format_instructions(),
+            },
+        )
 
 
-open_ended_question_answer_parser = PydanticOutputParser(pydantic_object=OpenEndedQuestionAnswer)
+def get_question_class(question_type: QuestionType, *args, **kwargs):
+    """
+    Get the question class based on the question type.
 
-GENERATE_OPEN_ENDED_QUESTION_ANSWER_PROMPT = PromptTemplate(
-    template="""Generate an open-ended question and its answer for the following passage: \n\n```{passage}```\n\nDifficulty Level: {difficulty}\n\n{format_instructions}""",
-    input_variables=["passage", "difficulty"],
-    partial_variables={
-        "format_instructions": open_ended_question_answer_parser.get_format_instructions()
-    },
-)
+    Args:
+        question_type (QuestionType): The type of question.
+
+    Returns:
+        BaseQuestion: The question class based on the question type.
+    """
+
+    if question_type == QuestionType.MULTIPLE_CHOICE:
+        return MultipleChoiceQuestion(*args, **kwargs)
+    elif question_type == QuestionType.TRUE_FALSE:
+        return TrueFalseQuestion(*args, **kwargs)
+    elif question_type == QuestionType.OPEN_ENDED:
+        return OpenEndedQuestion(*args, **kwargs)
+    else:
+        raise ValueError("Invalid question type")

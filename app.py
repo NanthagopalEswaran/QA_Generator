@@ -16,6 +16,7 @@ import os
 import streamlit as st
 from openai import AuthenticationError
 from pydantic.v1.error_wrappers import ValidationError
+from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 from qa_generator.about import about_content
 from qa_generator.constants import DifficultyLevel, QuestionType
@@ -37,6 +38,35 @@ st.set_page_config(
         "About": about_content,
     },
 )
+
+
+def save_to_temp_file(file_obj: UploadedFile):
+    """
+    Save the contents of an uploaded file to a temporary file.
+
+    Args:
+        file_obj (UploadedFile): The uploaded file object.
+
+    Returns:
+        str: The path of the temporary file where the contents are saved.
+    """
+    file_path = os.path.join(os.environ["DATA_DIR"], f"{file_obj.file_id}.{file_obj.name}")
+    with open(file_path, "wb") as temp_file:
+        content = file_obj.read()
+        temp_file.write(content)
+        print(f"file saved to {file_path}")
+    return file_path
+
+
+def delete_temp_file(file_path: str):
+    """
+    Delete the temporary file.
+
+    Args:
+        file_path (str): The path of the temporary file to delete.
+    """
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
 
 def main():  # noqa: C901
@@ -94,11 +124,13 @@ def main():  # noqa: C901
         if uploaded_file is not None:
             with st.spinner("Processing the uploaded file..."):
                 try:
-                    file = File(uploaded_file)
+                    file = File(save_to_temp_file(uploaded_file))
                 except Exception as e:
                     print(e)
                     st.error("Could not process the uploaded file. Try again or different file")
                     return
+                finally:
+                    delete_temp_file(file.file_path)
             with st.spinner("Generating questions..."):
                 os.environ["OPENAI_API_KEY"] = openai_api_key
                 try:
@@ -123,7 +155,7 @@ def main():  # noqa: C901
                     st.error(
                         f"Unexpected error occured while generating questions. please try again. {err}"
                     )
-                    return
+                    raise
             st.write("---")  # Add a separator
             st.header("Generated Questions")
             for i, result in enumerate(results):

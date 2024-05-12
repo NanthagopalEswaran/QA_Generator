@@ -4,7 +4,7 @@ from enum import Enum
 class QuestionType(Enum):
     MULTIPLE_CHOICE = "Multiple choice"
     TRUE_FALSE = "True/false"
-    FILL_IN_THE_BLANK = "Fill in the blank"
+    FILL_IN_THE_BLANK = "Fill in the blank"  # TODO: Implement this
     OPEN_ENDED = "Open-ended"
 
 
